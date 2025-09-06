@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title h5 mb-0">Exam Successfully Submitted</h2>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <img src="{{ url_for('static', filename='images/checkmark.png') }}" 
+                         alt="Success" width="100" class="mb-3"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'><circle cx=\'50\' cy=\'50\' r=\'40\' fill=\'%2328a745\'/><path d=\'M30 50 L45 65 L70 35\' stroke=\'white\' stroke-width=\'8\' fill=\'none\'/></svg>';">
+                </div>
+                
+                <h3 class="h4 mb-3">Thank You for Completing the Exam</h3>
+                <p class="lead">Your responses have been recorded successfully.</p>
+                
+                <div class="alert alert-info mt-4">
+                    <p><strong>Next Steps:</strong></p>
+                    <p>Your exam will be evaluated and results will be communicated to you via email.</p>
+                </div>
+                
+                <div class="mt-4">
+                    <p>Your session ID: <strong>{{ session.user_id }}</strong></p>
+                    <p>Please keep this ID for reference if you need assistance.</p>
+                </div>
+                
+                <div class="mt-5">
+                    <a href=" http://127.0.0.1:5000/index" class="btn btn-primary">Return to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

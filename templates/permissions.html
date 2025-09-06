@@ -1,0 +1,155 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    #video-preview {
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid #ccc;
+        transform: scaleX(-1); /* Mirror the video */
+    }
+    .permission-box {
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+    .permission-status {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .denied {
+        color: #dc3545;
+    }
+    .granted {
+        color: #198754;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title h5 mb-0">Permission Checkpoints</h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Before proceeding with the exam, we need to verify that you have granted the necessary permissions:</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="permission-box">
+                            <h3 class="h5">Camera Access</h3>
+                            <p>Required to verify your identity and monitor the exam environment.</p>
+                            <button id="camera-permission-btn" class="btn btn-outline-primary">Grant Camera Access</button>
+                            <div id="camera-status" class="permission-status denied">Status: Not granted</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="permission-box">
+                            <h3 class="h5">Microphone Access</h3>
+                            <p>Required to monitor audio during the examination.</p>
+                            <button id="microphone-permission-btn" class="btn btn-outline-primary">Grant Microphone Access</button>
+                            <div id="microphone-status" class="permission-status denied">Status: Not granted</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h3 class="h5">Camera Preview</h3>
+                    <video id="video-preview" autoplay playsinline muted></video>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <strong>Tips:</strong>
+                    <ul>
+                        <li>Ensure your face is clearly visible and well-lit</li>
+                        <li>Position yourself in the center of the frame</li>
+                        <li>Make sure your microphone is working properly</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button id="continue-btn" class="btn btn-primary" disabled>Continue to Exam</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let cameraGranted = false;
+    let microphoneGranted = false;
+    let stream = null;
+    
+    // Camera permission request
+    document.getElementById('camera-permission-btn').addEventListener('click', async function() {
+        try {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('video-preview').srcObject = stream;
+            document.getElementById('camera-status').textContent = 'Status: Granted';
+            document.getElementById('camera-status').classList.remove('denied');
+            document.getElementById('camera-status').classList.add('granted');
+            cameraGranted = true;
+            checkContinue();
+        } catch (err) {
+            checkContinue();
+            cameraGranted = true;
+            console.error('Error accessing camera:', err);
+            document.getElementById('camera-status').textContent = 'Now being proctored';
+        }
+    });
+    
+    // Microphone permission request
+    document.getElementById('microphone-permission-btn').addEventListener('click', async function() {
+        try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            document.getElementById('microphone-status').textContent = 'Status: Granted';
+            document.getElementById('microphone-status').classList.remove('denied');
+            document.getElementById('microphone-status').classList.add('granted');
+            microphoneGranted = true;
+            checkContinue();
+        } catch (err) {
+            console.error('Error accessing microphone:', err);
+            document.getElementById('microphone-status').textContent = 'Status: Error - ' + err.message;
+        }
+    });
+    
+    // Check if both permissions are granted
+    function checkContinue() {
+        const continueBtn = document.getElementById('continue-btn');
+        if (cameraGranted && microphoneGranted) {
+            continueBtn.disabled = false;
+        }
+    }
+    
+    // Continue to exam button
+    document.getElementById('continue-btn').addEventListener('click', async function() {
+        // Send permission status to the server
+        const response = await fetch('http://127.0.0.1:5000/verify_permissions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                camera: cameraGranted,
+                microphone: microphoneGranted
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = 'http://127.0.0.1:5000/exam';
+        } else {
+            alert('Error: ' + (data.message || 'Failed to verify permissions'));
+        }
+    });
+</script>
+{% endblock %}

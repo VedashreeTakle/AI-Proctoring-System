@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title h5 mb-0">Welcome to the Online Examination Portal</h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text">This system uses AI-powered proctoring to ensure exam integrity. Before you begin:</p>
+                <ul>
+                    <li>Make sure you're in a well-lit, quiet room</li>
+                    <li>Place your camera so your face is clearly visible</li>
+                    <li>Have your ID ready for verification</li>
+                    <li>Close all other applications and browser tabs</li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <strong>Important:</strong> The system will detect:
+                    <ul>
+                        <li>Multiple people in the frame</li>
+                        <li>Mobile phone usage</li>
+                        <li>Looking away from the screen</li>
+                        <li>Speaking or suspicious lip movements</li>
+                        <li>Any attempt to use a fake video feed</li>
+                    </ul>
+                </div>
+                
+                <form id="id-verification-form" class="mt-4">
+                    <div class="mb-3">
+                        <label for="full-name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="full-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="student-id" class="form-label">Student ID</label>
+                        <input type="text" class="form-control" id="student-id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Continue to Permissions</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('id-verification-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        // In a real application, you would validate the information
+        // For this demo, we'll just redirect to the permissions page
+        window.location.href = "http://127.0.0.1:5000/permissions";
+    });
+</script>
+{% endblock %}
